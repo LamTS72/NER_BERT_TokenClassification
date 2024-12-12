@@ -2,20 +2,22 @@ from transformers import (
     AutoTokenizer,
     DataCollatorForTokenClassification
 )
-from data_training import CustomDataset
+from model.data_training import CustomDataset
 from torch.utils.data import DataLoader
 
 class Preprocessing():
-    def __init__(self, model_tokenizer="bert-base-cased", batch_size=8, dataset=CustomDataset()):
+    def __init__(self, model_tokenizer="bert-base-cased", batch_size=8, dataset=None, flag_predict=False):
         self.tokenizer = AutoTokenizer.from_pretrained(model_tokenizer)
-        print("-"*50, "Information of Tokenizer", "-"*50)
-        print(self.tokenizer)
-        print("-"*50, "Information of Tokenizer", "-"*50)
-        self.tokenized_train_set, self.tokenized_test_set, self.tokenized_val_set = self.map_tokenize_dataset(dataset=dataset)
         self.data_collator = DataCollatorForTokenClassification(tokenizer=self.tokenizer)
-        self.id2label, self.label2id = self.hashmap_id_label(dataset=dataset)
-        self.train_loader, self.test_loader, self.val_loader = self.data_loader(batch_size=batch_size)
-        self.step_train_loader, self.step_test_loader, self.step_val_loader = len(self.train_loader), len(self.test_loader), len(self.val_loader)
+        if flag_predict == False:
+            dataset = CustomDataset()
+            print("-"*50, "Information of Tokenizer", "-"*50)
+            print(self.tokenizer)
+            print("-"*50, "Information of Tokenizer", "-"*50)
+            self.id2label, self.label2id = self.hashmap_id_label(dataset=dataset)
+            self.tokenized_train_set, self.tokenized_test_set, self.tokenized_val_set = self.map_tokenize_dataset(dataset=dataset)
+            self.train_loader, self.test_loader, self.val_loader = self.data_loader(batch_size=batch_size)
+            self.step_train_loader, self.step_test_loader, self.step_val_loader = len(self.train_loader), len(self.test_loader), len(self.val_loader)
     
     def align_labels_from_tokens(self, name_tags, word_ids):
         """After Tokenizer the length of labels is changed,

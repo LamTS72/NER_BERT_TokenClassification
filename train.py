@@ -7,8 +7,9 @@ from transformers import (
 import evaluate
 import torch
 import os
-from preprocessing import Preprocessing
-from data_training import CustomDataset
+from model.preprocessing import Preprocessing
+from model.data_training import CustomDataset
+from config.config import ConfigModel, ConfigHelper
 import numpy as np
 import evaluate
 from tqdm.auto import tqdm
@@ -19,8 +20,14 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 print("Used Device: ", device)
 
 class Training():
-    def __init__(self, model_name="bert-base-cased", learning_rate=2e-5, epoch=5, 
-                 num_warmup_steps=0, name_metric="seqeval", path_tensorboard="data_run", path_save="token_classifier"):
+    def __init__(self, model_name=ConfigModel.MODEL_NAME, 
+                 learning_rate=ConfigModel.LEARNING_RATE, 
+                 epoch=ConfigModel.EPOCHS, 
+                 num_warmup_steps=ConfigModel.NUM_WARMUP_STEPS, 
+                 name_metric=ConfigModel.METRICs, 
+                 path_tensorboard=ConfigModel.PATH_TENSORBOARD, 
+                 path_save=ConfigModel.PATH_SAVE
+                ):
         self.dataset = CustomDataset()
         self.process = Preprocessing(dataset=self.dataset)
         self.model = AutoModelForTokenClassification.from_pretrained(
@@ -45,12 +52,12 @@ class Training():
             num_training_steps=self.num_steps
         )
         self.metric = evaluate.load(name_metric)
-        self.writer = SummaryWriter("runs/" + path_tensorboard)
+        self.writer = SummaryWriter(path_tensorboard)
         
         # Define necessary variables
-        self.api = HfApi(token="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")
+        self.api = HfApi(token=ConfigHelper.TOKEN_HF)
         self.repo_name = path_save  # Replace with your repo name
-        self.author = "Chessmen"
+        self.author = ConfigHelper.AUTHOR
         self.repo_id = self.author + "/" + self.repo_name
         self.token = HfFolder.get_token()
         self.repo = self.setup_hf_repo(self.repo_name, self.repo_id, self.token)
@@ -189,7 +196,26 @@ class Training():
             # Save and upload after each epoch
             final_commit = ((epoch+1) == self.epochs)
             self.save_and_upload((epoch+1), final_commit)
-            
+    
+    def test(self):
+        self.model.eval()
+        for i, batch in enumerate(self.process.test_loader):
+            batch = {k: v.to(device) for k, v in batch.items()}
+            with torch.no_grad():   
+                outputs = self.model.to(device)(**batch)
+            logits = outputs.logits
+            predictions = torch.argmax(logits, dim=-1)
+            labels = batch["labels"]
+            true_predictions, true_labels = self.postprocess(predictions, labels)
+            self.metric.add_batch(predictions=true_predictions, references=true_labels)
+            metrics = self.metric.compute()
+            print(
+                f"Result Test:",
+                {
+                    key: metrics[f"overall_{key}"]
+                    for key in ["precision", "recall", "f1", "accuracy"]
+                },
+            )       
         
                 
 if __name__ == '__main__':

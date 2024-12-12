@@ -5,12 +5,12 @@ from torch.utils.data import Dataset, DataLoader
 class CustomDataset(Dataset):
     def __init__(self, path_dataset="eriktks/conll2003", revision=None):
         self.raw_data = load_dataset(path_dataset)
+        self.name_tags = self.raw_data["train"].features["ner_tags"].feature.names
+        self.num_classes = self.raw_data["train"].features["ner_tags"].feature.num_classes
         self.train_set = self.raw_data["train"]
         self.test_set = self.raw_data["test"]
         self.val_set = self.raw_data["validation"]
         self.size = len(self.train_set) + len(self.test_set) + len(self.val_set)
-        self.name_tags = self.raw_data["train"].features["ner_tags"].feature.names
-        self.num_classes = self.raw_data["train"].features["ner_tags"].feature.num_classes
         print("-"*40, "Information of Dataset", "-"*40)
         print(self.raw_data)
         print("Labels tag name: ", self.name_tags)
