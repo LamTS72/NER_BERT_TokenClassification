@@ -7,9 +7,9 @@ from transformers import (
 import evaluate
 import torch
 import os
-from model.preprocessing import Preprocessing
-from model.data_training import CustomDataset
-from config.config import ConfigModel, ConfigHelper
+from models.preprocessing import Preprocessing
+from data.data_training import CustomDataset
+from configs.config import ConfigModel, ConfigHelper
 import numpy as np
 import evaluate
 from tqdm.auto import tqdm

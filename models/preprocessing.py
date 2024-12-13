@@ -2,7 +2,7 @@ from transformers import (
     AutoTokenizer,
     DataCollatorForTokenClassification
 )
-from model.data_training import CustomDataset
+from models.data_training import CustomDataset
 from torch.utils.data import DataLoader
 
 class Preprocessing():

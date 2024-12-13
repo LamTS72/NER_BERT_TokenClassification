@@ -3,8 +3,8 @@ import safetensors
 from transformers import (
     AutoModelForTokenClassification
 )
-from model.preprocessing import Preprocessing
-from config.config import ConfigModel
+from models.preprocessing import Preprocessing
+from configs.config import ConfigModel
 
 import torch
 class Predictor():
