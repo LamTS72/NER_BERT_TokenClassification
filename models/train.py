@@ -8,6 +8,7 @@ import evaluate
 import torch
 import os
 from models.preprocessing import Preprocessing
+from models.ner_model import CustomModel
 from data.data_training import CustomDataset
 from configs.config import ConfigModel, ConfigHelper
 import numpy as np
@@ -30,15 +31,11 @@ class Training():
                 ):
         self.dataset = CustomDataset()
         self.process = Preprocessing(dataset=self.dataset)
-        self.model = AutoModelForTokenClassification.from_pretrained(
-            model_name,
-            id2label=self.process.id2label,
-            label2id=self.process.label2id
-        )
-        print("-"*50, "Information of Model", "-"*50)
-        print(self.model)
-        print("Parameters: ", int(self.model.num_parameters() / 1000000),  "M")
-        print("-"*50, "Information of Model", "-"*50)
+        self.model = CustomModel(model_name, 
+                                 self.process.id2label, 
+                                 self.process.label2id,
+                                 True).model
+
         self.epochs = epoch
         self.num_steps = self.epochs * self.process.step_train_loader
         self.optimizer = torch.optim.AdamW(

@@ -11,11 +11,11 @@ class CustomDataset(Dataset):
         self.test_set = self.raw_data["test"]
         self.val_set = self.raw_data["validation"]
         self.size = len(self.train_set) + len(self.test_set) + len(self.val_set)
-        print("-"*40, "Information of Dataset", "-"*40)
+        print("-"*50, "Information of Dataset", "-"*50)
         print(self.raw_data)
         print("Labels tag name: ", self.name_tags)
         print("Number of tag name: ", self.num_classes)
-        print("-"*40, "Information of Dataset", "-"*40)
+        print("-"*50, "Information of Dataset", "-"*50)
         
     
     def __len__(self):
