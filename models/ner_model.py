@@ -14,6 +14,8 @@ class CustomModel():
             print(self.model)
             print("Parameters: ", int(self.model.num_parameters() / 1000000),  "M")
             print("-"*50, "Information of Model", "-"*50)
+
+            
     def create_model(self):
         return AutoModelForTokenClassification.from_pretrained(
             self.model_name,
